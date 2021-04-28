@@ -1,14 +1,15 @@
-const { ApolloServer } = require("apollo-server");
+const { ApolloServer, PubSub } = require("apollo-server");
 const typeDefs = require("../graphql/typeDefs");
 const resolvers = require("../graphql/resolvers");
 const mongoose = require("mongoose");
 const { MONGODB } = require("./config");
 
+const pubsub = new PubSub();
 // Creates an apollo server with GraphQL typeDefs and resolvers destructured.
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => ({ req }),
+  context: ({ req }) => ({ req, pubsub }),
 });
 
 // Connects to the mongo database on port 5000 with the Apollo server.
