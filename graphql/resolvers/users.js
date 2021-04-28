@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { UserInputError } = require("apollo-server");
 
+// Generates a JSON Web token with id, email, username as payload.
 function generateToken(user) {
   return jwt.sign(
     {
@@ -20,6 +21,7 @@ function generateToken(user) {
 
 module.exports = {
   Mutation: {
+    // Login function, checks and validates the login inputs.
     async login(_, { username, password }) {
       const { errors, valid } = validateLoginInput(username, password);
       if (!valid) {
@@ -41,6 +43,7 @@ module.exports = {
         throw new UserInputError("Wrong credentials", { errors });
       }
 
+      // Generates a token with the user and returns that information.
       const token = generateToken(user);
       return {
         ...user._doc,
@@ -70,7 +73,9 @@ module.exports = {
         });
       }
 
+      // Gets the password from the register input, and hashes the password in 12 rounds.
       password = await bcrypt.hash(password, 12);
+      // Creates a new user with the register input.
       const newUser = new User({
         email,
         username,
