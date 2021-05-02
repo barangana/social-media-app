@@ -56,6 +56,7 @@ module.exports = {
       _,
       { registerInput: { username, email, password, confirmPassword } }
     ) {
+      // Validate user data
       const { valid, errors } = validateRegisterInput(
         username,
         email,
@@ -65,17 +66,18 @@ module.exports = {
       if (!valid) {
         throw new UserInputError("Errors", { errors });
       }
-      // Finds if the username is in the database, if it is, gives an error validation to the user. If there's no user then creates a new user.
+      // TODO: Make sure user doesnt already exist
       const user = await User.findOne({ username });
       if (user) {
-        throw new UserInputError("Username is taken.", {
-          errors: { username: "This username is taken." },
+        throw new UserInputError("Username is taken", {
+          errors: {
+            username: "This username is taken",
+          },
         });
       }
-
-      // Gets the password from the register input, and hashes the password in 12 rounds.
+      // hash password and create an auth token
       password = await bcrypt.hash(password, 12);
-      // Creates a new user with the register input.
+
       const newUser = new User({
         email,
         username,
@@ -84,7 +86,9 @@ module.exports = {
       });
 
       const res = await newUser.save();
+
       const token = generateToken(res);
+
       return {
         ...res._doc,
         id: res._id,
